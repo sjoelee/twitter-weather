@@ -112,8 +112,8 @@ def main():
     classes_prob_dict = {}
     for idx, label in enumerate(labels):
         classes_prob_dict[label] = classes_prob[idx]
-
     classes_prob = ProbDist(classes_prob_dict)
+    print classes_prob.prob('s5')
 
     clean_tweets = sanitize_tweets(train_tweet)
     train_set = clean_tweets[0:9]
@@ -134,11 +134,16 @@ def main():
 
     # From train count, pull only the vectors corresponding to their classes.
     # Then get assign the classes to different lists.
-    (train_s1_idx, train_s1, train_count_s1) = get_class_tweets_and_indices(train_set, s1, train_count_d)
-    (train_s2_idx, train_s2, train_count_s2) = get_class_tweets_and_indices(train_set, s2, train_count_d)
-    (train_s3_idx, train_s3, train_count_s3) = get_class_tweets_and_indices(train_set, s3, train_count_d)
-    (train_s4_idx, train_s4, train_count_s4) = get_class_tweets_and_indices(train_set, s4, train_count_d)
-    (train_s5_idx, train_s5, train_count_s5) = get_class_tweets_and_indices(train_set, s5, train_count_d)
+    (train_s1_idx, train_s1, train_count_s1) =\
+        get_class_tweets_and_indices(train_set, s1, train_count_d)
+    (train_s2_idx, train_s2, train_count_s2) =\
+        get_class_tweets_and_indices(train_set, s2, train_count_d)
+    (train_s3_idx, train_s3, train_count_s3) =\
+        get_class_tweets_and_indices(train_set, s3, train_count_d)
+    (train_s4_idx, train_s4, train_count_s4) =\
+        get_class_tweets_and_indices(train_set, s4, train_count_d)
+    (train_s5_idx, train_s5, train_count_s5) =\
+        get_class_tweets_and_indices(train_set, s5, train_count_d)
 
     # Grab the size of each class
     classes_size = np.array([len(train_s1), len(train_s2), len(train_s3),\
@@ -153,19 +158,23 @@ def main():
     train_count_class[3][:] = np.sum(train_count_s4, axis=0)
     train_count_class[4][:] = np.sum(train_count_s5, axis=0)
 
-    # Create a dictionary that captures the conditional probability matrix P(X_i=x | Y=k), where each 
-    # row represents a class (Y=k) and each column represents a feature instance X_i=x.
+    # Create a dictionary that captures the conditional probability matrix
+    # P(X_i=x | Y=k), where each row represents a class (Y=k) and each column
+    # represents a feature instance X_i=x.
     # The keys are (label, fname). From our count_vocab, we'll need to extract
     # the fname and its corresponding index.
     feat_prob_dist = {}
     for class_val in range(0,NUM_WEATHER):
         for feature, idx in vocab:
-            feat_prob_dist[class_val, feature] = train_count_class[class_val][idx]/float(classes_size[class_val])
+            feat_prob_dist[class_val, feature] =\
+                train_count_class[class_val][idx]/float(classes_size[class_val])
+    feat_prob_dist = ProbDist(feat_prob_dist)
+    print len(feat_prob_dist.keys())
 
     # Create a NaiveBayesClassifier object based off of our probability
     # distributions
-    # nb = NaiveBayesClassifier(classes_prob, feat_prob_dist)
-    # nb.classify([clean_tweets[8]])
+    nb = NaiveBayesClassifier(classes_prob, feat_prob_dist)
+    nb.classify([clean_tweets[8]])
     # Test
 
     # Form the conditional probability of each feature/word given a certain class
