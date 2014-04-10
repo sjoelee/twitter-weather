@@ -93,43 +93,47 @@ def main():
     # unrelated = 's5'
     labels = [1, 2, 3, 4, 5]
     str_labels = ['s1', 's2', 's3', 's4', 's5']
-    train_labels = [0]*num_train
+    train_labels = np.zeros((num_train,), dtype=np.int)
     
     # Convert labels to a vector of classes
     for idx in range(0, 5):
         label_p = train[str_labels[idx]]
         for idx2 in range(0, num_train):
             if label_p[idx2] > 0.5:
-                # train_labels[idx2] = labels[idx]
                 train_labels[idx2] = labels[idx]
 
-    lbin = LabelBinarizer()
-    train_labels_ml = lbin.fit_transform(train_labels)
-
+    # Remove punctuation
     clean_tweets = sanitize_tweets(train_tweet)
-    train_set = clean_tweets[0:8]
-    vocab = get_vocab(train_set)
 
-    #
-    # NAIVE BAYES IMPLEMENTATION
-    #
+    # (NOTE: Use get_vocab() this for debugging purposes.) 
+    # Obtain words to see what they are.
+    # vocab = get_vocab(train_set)
+
     # Obtain vectors which count how often a word has occurred in the list of
-    # possible vocab words (formed by looking at all samples)
+    # possible vocab words (formed by looking at all samples) and removes all
+    # the common words, much like TfidfVectorizer
     cv = CountVectorizer(max_features = 1000,
                          stop_words = 'english',
                          lowercase = True,
                          analyzer = 'word')
-    train_count = cv.fit_transform(train_set)
-    train_count_d = np.array(train_count.toarray())
+    clean_tweets = cv.fit_transform(clean_tweets)
+    clean_tweets = np.array(clean_tweets.toarray())
 
-    # Sample test 
-    trainSet = train_count_d[0:7,:]
-    testSet = train_count_d[7,:]
+    # Split Data into training and cross-validation: 75% training, 25% cross-validation
+    num_train_cv = num_train/4
+    cv_threshold = num_train - num_train_cv
+    train_set = clean_tweets[0:cv_threshold]
+    train_set_cv = clean_tweets[cv_threshold:]
+    train_set_labels = train_labels[0:cv_threshold]
+    train_set_labels_cv = train_labels[cv_threshold:]
 
+    # Multinomial Naive Bayes
+    # Classification is about 57%. Perhaps use bigram or trigram for more
+    # resolution?
     mnb = naive_bayes.MultinomialNB()
-    mnb.fit(train_count_d, train_labels_ml[0:8])
-    mnb.score(testSet, train_labels_ml[8])
-
+    mnb.fit(train_set, train_set_labels)
+    print "Classification accuracy of Multinomial Naive Bayes = ",\
+        mnb.score(train_set_cv, train_set_labels_cv)
 
 if __name__=="__main__":
     main()
