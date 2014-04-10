@@ -77,12 +77,12 @@ def main():
     #
     # Note: make sure you remove empty lines at the end of the training set!
     #
-    paths = ['./train_short.csv', './test.csv']
+    paths = ['./train.csv', './test.csv']
     train = pd.read_csv(paths[0])
     test = pd.read_csv(paths[1])
     train_tweet = train['tweet']
     num_train = train_tweet.__len__()
-    # Obtain indices for weather sentiment
+
     # NOTE: if it's unrelated, then why do i care whether it's positive, negative, or 
     # neutural? Perhaps you need keywords to determine if a tweet is unrelated or not.
     #
@@ -102,17 +102,12 @@ def main():
             if label_p[idx2] > 0.5:
                 # train_labels[idx2] = labels[idx]
                 train_labels[idx2] = labels[idx]
-    print train_labels
-    print train_labels[0:7]
 
     lbin = LabelBinarizer()
     train_labels_ml = lbin.fit_transform(train_labels)
-    print train_labels_ml
-
 
     clean_tweets = sanitize_tweets(train_tweet)
     train_set = clean_tweets[0:8]
-    print train_set.__len__()
     vocab = get_vocab(train_set)
 
     #
@@ -127,12 +122,9 @@ def main():
     train_count = cv.fit_transform(train_set)
     train_count_d = np.array(train_count.toarray())
 
+    # Sample test 
     trainSet = train_count_d[0:7,:]
     testSet = train_count_d[7,:]
-    print train_count_d[7,:]
-    print train_count_d.shape
-    print train_labels.__len__()
-    print train_count_d[7]
 
     mnb = naive_bayes.MultinomialNB()
     mnb.fit(train_count_d, train_labels_ml[0:8])
