@@ -3,7 +3,6 @@
 #
 # Authors: Sammy Lee
 #
-import math
 import numpy as np
 import pandas as pd
 
@@ -119,7 +118,8 @@ def main():
     clean_tweets = cv.fit_transform(clean_tweets)
     clean_tweets = np.array(clean_tweets.toarray())
 
-    # Split Data into training and cross-validation: 75% training, 25% cross-validation
+    # Split Data into training and cross-validation: 
+    # 75% training, 25% cross-validation
     num_train_cv = num_train/4
     cv_threshold = num_train - num_train_cv
     train_set = clean_tweets[0:cv_threshold]
@@ -127,8 +127,8 @@ def main():
     train_set_labels = train_labels[0:cv_threshold]
     train_set_labels_cv = train_labels[cv_threshold:]
 
-    # Multinomial Naive Bayes
-    # Classification is about 57%. Perhaps use bigram or trigram for more
+    # MULTINOMIAL NAIVE BAYES
+    # Note: Perhaps use bigram or trigram for more
     # resolution?
     mnb = naive_bayes.MultinomialNB()
     mnb.fit(train_set, train_set_labels)
